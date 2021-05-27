@@ -15,9 +15,11 @@ set.seed(1776)                #
 
 # ** CM & Version ------------------------------------------------------------------------------------------
 Client.Matter.Info<-"PMA - Vista (073406-092)"
-Version.Number<-"Quick Analysis v1"
+Version.Number<-"Quick Analysis v2"
 Client.Matter.Info.AND.Version.Number<-paste(Client.Matter.Info, "-", Version.Number)
 
+
+stop("Nothing has been changed from v1 as of yet!")
 
 
 #** Working Directory --------------------------------------------------------------------------------------

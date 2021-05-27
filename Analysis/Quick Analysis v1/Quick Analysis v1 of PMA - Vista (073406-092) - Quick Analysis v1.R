@@ -267,8 +267,7 @@ DF<-DF %>% rename(Provider.or.Facility=Provider.Facility)
 glimpse(DF)
 
 
-DF %>% 
-  filter(Type.of.Claim=="Professional" | Type.of.Claim=="Cosmetic") %>% 
+DF_Patient_Agg<-DF %>% 
   arrange(Date.of.Service.From) %>% 
   group_by(Patient) %>% 
   summarize(Has.Cosmetic.Claim=str_detect(list.collapse(Type.of.Claim), "Cosmetic"),
@@ -283,7 +282,20 @@ DF %>%
             
             COUNTD_Provider.Category.of.Surgery=n_distinct(paste(Provider.Office, Category.of.Surgery)),
             COUNTD_Category.of.Surgery=n_distinct(Category.of.Surgery),
-            List_Category.of.Surgery=list.collapse(Category.of.Surgery, Clean = TRUE, Sort = TRUE) ) %>%
+            List_Category.of.Surgery=list.collapse(Category.of.Surgery, Clean = TRUE, Sort = TRUE) ) %>% 
+  mutate(Mid.Priority=(str_detect(LIST_C_Provider.Office, "Dahiya") & str_detect(LIST_C_Provider.Office, "Patel") |
+                         str_detect(LIST_C_Provider.Office, "Dahiya") & str_detect(LIST_C_Provider.Office, "Gomez Garcia") |
+                         str_detect(LIST_C_Provider.Office, "Patel") & str_detect(LIST_C_Provider.Office, "Gomez Garcia")),
+         
+         High.Priority=(str_detect(LIST_C_Provider.Office, "Dahiya") &
+                          str_detect(LIST_C_Provider.Office, "Patel") & 
+                          str_detect(LIST_C_Provider.Office, "Gomez Garcia")),
+         
+         Evaluate.These=(Mid.Priority+High.Priority)>0 )
+
+View(DF_Patient_Agg)
+
+DF_Patient_Agg %>%   
   group_by(LIST_C_Provider.Office) %>% 
   summarize(COUNT_Patient=n_distinct(Patient),
             COUNT_Patient_ProcedureCodes=sum(COUNTD_Provider_Procedure_Code),
@@ -301,11 +313,11 @@ DF %>%
                           str_detect(LIST_C_Provider.Office, "Gomez Garcia")),
          
          Evaluate.These=(Mid.Priority+High.Priority)>0 ) %>% 
-  View()
+  View(., "LIST_C_Provider.Office")
 
 
 
-
+stop()
 
 
 
@@ -313,6 +325,12 @@ fwrite.DF.to.csv.as.char(DF,
                          file.path(WD.Compiled.Data,
                                    paste(Client.Matter.Info.AND.Version.Number, 
                                          "DF Exported.csv")))
+
+
+fwrite.DF.to.csv.as.char(DF_Patient_Agg,
+                         file.path(WD.Compiled.Data,
+                                   paste(Client.Matter.Info.AND.Version.Number, 
+                                         "DF_Patient_Agg Exported.csv")))
 
 
 
